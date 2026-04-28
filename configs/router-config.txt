@@ -1,0 +1,115 @@
+conf t
+hostname AWS-VPN-RTR
+
+!
+! ---------------------------
+! INTERFACES
+! ---------------------------
+!
+interface GigabitEthernet0/0
+ description WAN to Verizon Router
+ ip address dhcp
+ ip nat outside
+ no shutdown
+
+interface GigabitEthernet0/1
+ description LAN (On-Prem Network)
+ ip address 192.168.0.1 255.255.255.0
+ ip nat inside
+ no shutdown
+
+!
+! ---------------------------
+! ROUTING
+! ---------------------------
+!
+ip route 0.0.0.0 0.0.0.0 dhcp
+
+!
+! ---------------------------
+! NAT (WITH VPN EXEMPTION)
+! ---------------------------
+!
+ip access-list extended NONAT
+ deny ip 192.168.0.0 0.0.0.255 10.0.0.0 0.0.255.255
+ permit ip 192.168.0.0 0.0.0.255 any
+
+ip nat inside source list NONAT interface GigabitEthernet0/0 overload
+
+!
+! ---------------------------
+! IKE (PHASE 1)
+! ---------------------------
+!
+crypto isakmp policy 10
+ encr aes 128
+ hash sha
+ authentication pre-share
+ group 2
+ lifetime 28800
+
+!
+! Pre-shared key (Tunnel 1)
+!
+crypto isakmp key amIF9LgFNOHdPvj3_ZW54w7plYXHxlOW address 34.193.85.87
+
+!
+! NAT keepalive (helps behind NAT)
+!
+crypto isakmp nat keepalive 10
+
+!
+! ---------------------------
+! IPSEC (PHASE 2)
+! ---------------------------
+!
+crypto ipsec transform-set AWS-SET esp-aes 128 esp-sha-hmac
+ mode tunnel
+
+crypto ipsec profile AWS-PROFILE
+ set transform-set AWS-SET
+ set pfs group2
+ set security-association lifetime seconds 3600
+
+!
+! ---------------------------
+! TUNNEL INTERFACE (AWS)
+! ---------------------------
+!
+interface Tunnel1
+ description AWS VPN Tunnel 1
+ ip address 169.254.222.170 255.255.255.252
+ tunnel source GigabitEthernet0/0
+ tunnel destination 34.193.85.87
+ tunnel mode ipsec ipv4
+ tunnel protection ipsec profile AWS-PROFILE
+ ip tcp adjust-mss 1379
+ no shutdown
+
+!
+! ---------------------------
+! ROUTE TO AWS
+! ---------------------------
+!
+ip route 10.0.0.0 255.255.0.0 Tunnel1
+
+!
+! ---------------------------
+! OPTIONAL SSH ACCESS (recommended)
+! ---------------------------
+!
+hostname vpn-router
+ip domain-name lab.local
+
+crypto key generate rsa modulus 2048
+ip ssh version 2
+
+username admin secret cisco123
+
+line vty 0 4
+ login local
+ transport input ssh
+
+!
+end
+write memory
