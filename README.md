@@ -120,15 +120,16 @@ This ensures AWS-bound traffic uses the VPN instead of the public internet.
 
 NAT is required for general internet access but must be bypassed for VPN traffic.
 
+**NAT Exemption ACL:**
+```
+ip access-list extended NONAT
+deny ip 192.168.0.0/24 10.0.0.0/16
+permit ip 192.168.0.0/24 any
+```
+
 **NAT Overload (PAT):**
 ```
 ip nat inside source list NONAT interface GigabitEthernet0/0 overload
-```
-
-**NAT Exemption ACL:**
-```
-deny ip 192.168.0.0/24 10.0.0.0/16
-permit ip 192.168.0.0/24 any
 ```
 
 **Behavior:**
