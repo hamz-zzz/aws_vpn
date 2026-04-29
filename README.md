@@ -351,7 +351,7 @@ Validation of bidirectional communication across the hybrid network.
 
 ### On-Prem → AWS
 
-### Ping On-Prem to EC2
+### Ping from On-Prem to EC2
 
 ![Ping On-Prem to EC2](screenshots/7-2-ping-from-onprem-to-ec2.png)
 
@@ -360,7 +360,7 @@ Validation of bidirectional communication across the hybrid network.
 
 ---
 
-### SSH On-Prem to EC2
+### SSH from On-Prem to EC2
 
 ![SSH On-Prem to EC2](screenshots/7-3-ssh-from-onprem-to-ec2.png)
 
@@ -371,7 +371,7 @@ Validation of bidirectional communication across the hybrid network.
 
 ### AWS → On-Prem
 
-### Ping EC2 to On-Prem
+### Ping from EC2 to On-Prem
 
 ![Ping EC2 to On-Prem](screenshots/7-4-ping-from-ec2-to-onprem.png)
 
@@ -380,7 +380,7 @@ Validation of bidirectional communication across the hybrid network.
 
 ---
 
-### SSH EC2 to On-Prem
+### SSH from EC2 to On-Prem
 
 ![SSH EC2 to On-Prem](screenshots/7-5-ssh-from-ec2-to-onprem.png)
 
