@@ -71,19 +71,6 @@ The architecture includes dual tunnels for redundancy and demonstrates reliable 
 
 The on-prem environment is simulated using GNS3 with a Cisco IOSv router acting as the Customer Gateway.
 
-#### Topology
-
-```
-On-Prem PC (192.168.0.10)
-    ↓
-GNS3 Router (CGW)
-    ↓
-Home Router (192.168.1.1)
-    ↓
-Internet
-    ↓
-AWS VGW
-```
 
 ### Router Interface Configuration
 
