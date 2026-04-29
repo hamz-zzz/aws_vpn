@@ -209,16 +209,39 @@ Traffic control logic between AWS and the on-prem network.
 Site-to-Site IPsec VPN establishing encrypted connectivity between AWS and on-prem.
 
 ![VPN Overview](screenshots/3-1-vpn-connection-overview.png)
-![Tunnel 1 Status](screenshots/3-2-tunnel-1-status.png)
-![Tunnel 2 Status](screenshots/3-3-tunnel-2-status.png)
-![Customer Gateway](screenshots/3-4-customer-gateway.png)
-![Virtual Private Gateway](screenshots/3-5-virtual-private-gateway.png)
+- VPN connection is in an **Available** state  
+- Static routing configured between on-prem (`192.168.0.0/24`) and AWS (`10.0.0.0/16`)  
 
-- VPN connection in **Available** state
-- Two IPsec tunnels established for redundancy
-- Customer Gateway mapped to public NAT endpoint (`96.230.78.21`)
-- Virtual Private Gateway attached to VPC as AWS termination point
-- Each tunnel uses independent /30 transit networks
+---
+
+![Tunnel 1 Status](screenshots/3-2-tunnel-1-status.png)
+- Primary tunnel is **UP**    
+- Actively handles traffic under normal conditions  
+
+---
+
+![Tunnel 2 Status](screenshots/3-3-tunnel-2-status.png)
+- Secondary tunnel is established  
+- Serves as standby path for failover  
+
+---
+
+![Customer Gateway](screenshots/3-4-customer-gateway.png)
+- Represents on-prem endpoint in AWS  
+- Public IP: `96.230.78.21` (NATed to internal router `192.168.1.100`)  
+- Uses static routing configuration  
+
+---
+
+![Virtual Private Gateway](screenshots/3-5-virtual-private-gateway.png) 
+- Acts as AWS-side VPN termination point  
+- Routes on-prem traffic into the VPC  
+
+---
+
+- Dual IPsec tunnels provide redundancy  
+- Each tunnel uses its own /30 transit network  
+- End-to-end encrypted connectivity established between environments
 
 ---
 
@@ -243,7 +266,7 @@ Simulated edge network using GNS3 and Cisco IOSv.
 
 - Internal network: `192.168.0.0/24`
 - Cisco IOSv router acts as Customer Gateway
-- WAN interface sits behind NAT (`192.168.1.100 → 96.230.78.21`)
+- WAN interface sits behind NAT (`96.230.78.21 → 192.168.1.100`)
 
 ---
 
