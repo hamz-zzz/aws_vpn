@@ -425,13 +425,10 @@ Resiliency test of dual-tunnel design.
 
 This repository includes supporting materials used to validate and document the deployment:
 
-- **[architecture/](./architecture/)**
-  - Contains the architecture diagram (PNG + SVG)
-
 - **[configs/](./configs/)**
   - Router configuration (`router-config.txt`)
-  - Startup configuration
-  - AWS-generated VPN configuration file
+  - Startup configuration (`startup-config.txt`)
+  - AWS-generated VPN configuration file (`vpn-01f8cd298e81015d2.txt`)
 
 - **[screenshots/](./screenshots/)**
   - AWS infrastructure configuration
