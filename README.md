@@ -326,8 +326,7 @@ Router-level interface, routing, and tunnel verification.
 ### Tunnel 1
 
 ![IPsec Tunnel 1](screenshots/6-4-show-crypto-ipsec-sa-t1.png)
-- Active IPsec tunnel (primary)
-- Packet counters increasing → traffic flowing
+- Active IPsec tunnel
 
 ---
 
@@ -335,7 +334,7 @@ Router-level interface, routing, and tunnel verification.
 
 ![IPsec Tunnel 2](screenshots/6-5-show-crypto-ipsec-sa-t2.png)
 - Secondary tunnel established
-- Ready for failover (may have low or no traffic)
+- Ready for failover
 
 ---
 
