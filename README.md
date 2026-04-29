@@ -195,7 +195,12 @@ The base network boundary and address space for the AWS environment.
 
 Traffic control logic between AWS and the on-prem network.
 
+### Route Table Routes
+
 ![Route Table Routes](screenshots/2-1-route-table-routes.png)
+
+### Route Table Associations
+
 ![Route Table Associations](screenshots/2-2-route-table-associations.png)
 
 - Route to `192.168.0.0/24` directed through Virtual Private Gateway
@@ -208,11 +213,15 @@ Traffic control logic between AWS and the on-prem network.
 
 Site-to-Site IPsec VPN establishing encrypted connectivity between AWS and on-prem.
 
+### VPN Overview
+
 ![VPN Overview](screenshots/3-1-vpn-connection-overview.png)
 - VPN connection is in an **Available** state  
 - Static routing configured between on-prem (`192.168.0.0/24`) and AWS (`10.0.0.0/16`)  
 
 ---
+
+### Tunnel 1 Status
 
 ![Tunnel 1 Status](screenshots/3-2-tunnel-1-status.png)
 - Primary tunnel is **UP**    
@@ -220,11 +229,15 @@ Site-to-Site IPsec VPN establishing encrypted connectivity between AWS and on-pr
 
 ---
 
+### Tunnel 2 Status
+
 ![Tunnel 2 Status](screenshots/3-3-tunnel-2-status.png)
 - Secondary tunnel is established  
 - Serves as standby path for failover  
 
 ---
+
+### Customer Gateway
 
 ![Customer Gateway](screenshots/3-4-customer-gateway.png)
 - Represents on-prem endpoint in AWS  
@@ -232,6 +245,8 @@ Site-to-Site IPsec VPN establishing encrypted connectivity between AWS and on-pr
 - Uses static routing configuration  
 
 ---
+
+### Virtual Private Gateway
 
 ![Virtual Private Gateway](screenshots/3-5-virtual-private-gateway.png) 
 - Acts as AWS-side VPN termination point  
@@ -249,7 +264,12 @@ Site-to-Site IPsec VPN establishing encrypted connectivity between AWS and on-pr
 
 Application workload used for connectivity testing.
 
+### EC2 Instance Details
+
 ![EC2 Instance Details](screenshots/4-1-ec2-instance-details.png)
+
+### Security Group Rules
+
 ![Security Group Rules](screenshots/4-2-security-group-rules.png)
 
 - EC2 instance deployed in public subnet `10.0.1.0/24`
@@ -261,6 +281,8 @@ Application workload used for connectivity testing.
 ## On-Prem Environment
 
 Simulated edge network using GNS3 and Cisco IOSv.
+
+### GNS3 Topology
 
 ![GNS3 Topology](screenshots/5-1-gns3-topology.png)
 
@@ -274,13 +296,15 @@ Simulated edge network using GNS3 and Cisco IOSv.
 
 Router-level interface, routing, and tunnel verification.
 
-### Interface and Routing State
+### Interfaces
 
 ![Interfaces](screenshots/6-1-show-ip-interface-brief.png) 
 - `GigabitEthernet0/0` (WAN) and `GigabitEthernet0/1` (LAN) are correctly assigned IP addresses  
 - `Tunnel1` and `Tunnel2` are in an up/up state, confirming both VPN tunnels are established at the interface level  
 
 ---
+
+### Routing Table
 
 ![Routes](screenshots/6-2-show-ip-route.png)
 - Static routes for `10.0.0.0/16` point to VPN tunnel interfaces  
@@ -296,11 +320,15 @@ Router-level interface, routing, and tunnel verification.
 
 ---
 
+### Tunnel 1
+
 ![IPsec Tunnel 1](screenshots/6-4-show-crypto-ipsec-sa-t1.png)
 - Active IPsec tunnel (primary)
 - Packet counters increasing → traffic flowing
 
 ---
+
+### Tunnel 2
 
 ![IPsec Tunnel 2](screenshots/6-5-show-crypto-ipsec-sa-t2.png)
 - Secondary tunnel established
@@ -321,12 +349,16 @@ Validation of bidirectional communication across the hybrid network.
 
 ### On-Prem → AWS
 
+### Ping On-Prem to EC2
+
 ![Ping On-Prem to EC2](screenshots/7-2-ping-from-onprem-to-ec2.png)
 
 ICMP echo request from `192.168.0.10` (on-prem host) → `10.0.1.61` (AWS EC2 instance)  
 Validates basic Layer 3 connectivity across the IPsec VPN tunnel.
 
 ---
+
+### SSH On-Prem to EC2
 
 ![SSH On-Prem to EC2](screenshots/7-3-ssh-from-onprem-to-ec2.png)
 
@@ -337,12 +369,16 @@ Validates secure administrative access over the encrypted VPN path.
 
 ### AWS → On-Prem
 
+### Ping EC2 to On-Prem
+
 ![Ping EC2 to On-Prem](screenshots/7-4-ping-from-ec2-to-onprem.png)
 
 ICMP echo request from `10.0.1.61` (AWS EC2 instance) → `192.168.0.10` (on-prem host)  
 Validates reverse routing from AWS back into the on-prem network.
 
 ---
+
+### SSH EC2 to On-Prem
 
 ![SSH EC2 to On-Prem](screenshots/7-5-ssh-from-ec2-to-onprem.png)
 
