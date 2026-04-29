@@ -90,12 +90,13 @@ The on-prem environment is simulated using GNS3 with a Cisco IOSv router acting 
 
 **Default route to internet:**
 ```
-ip route 0.0.0.0 0.0.0.0 192.168.1.1
+ip route 0.0.0.0 0.0.0.0 GigabitEthernet0/0 192.168.1.1
 ```
 
 **Routes to AWS VPC:**
 ```
-10.0.0.0/16 → Tunnel interfaces
+ip route 10.0.0.0 255.255.0.0 Tunnel1 track 100
+ip route 10.0.0.0 255.255.0.0 Tunnel2 track 200
 ```
 
 This ensures AWS-bound traffic uses the VPN instead of the public internet.
