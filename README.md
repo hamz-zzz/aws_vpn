@@ -384,6 +384,7 @@ Validates reverse routing from AWS back into the on-prem network.
 
 SSH session from `10.0.1.61` (AWS EC2 instance) → `192.168.0.10` (on-prem host)  
 Validates full bidirectional reachability and functional return path through the VPN.
+
 ---
 
 ## Failover Behavior
