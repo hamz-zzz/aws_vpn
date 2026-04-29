@@ -134,8 +134,8 @@ The VPN is built using AWS Site-to-Site VPN and consists of two redundant IPsec 
 ### Tunnel 1 (Primary)
 
 - AWS Public Peer IP: `34.193.85.87`
-- On-Prem Public Endpoint (NATed): `96.230.78.21`
-- On-Prem WAN Interface (inside NAT): `192.168.1.100`
+- On-Prem Public Endpoint (Verizon router): `96.230.78.21`
+- On-Prem WAN Interface (GigabitEthernet0/0): `192.168.1.100`
 - Tunnel Interface: `Tunnel1`
 - Inside Tunnel IPs:
   - AWS: `169.254.222.169/30`
@@ -146,8 +146,8 @@ The VPN is built using AWS Site-to-Site VPN and consists of two redundant IPsec 
 ### Tunnel 2 (Secondary)
 
 - AWS Public Peer IP: `100.50.211.87`
-- On-Prem Public Endpoint (NATed): `96.230.78.21`
-- On-Prem WAN Interface (inside NAT): `192.168.1.100`
+- On-Prem Public Endpoint (Verizon router): `96.230.78.21`
+- On-Prem WAN Interface (GigabitEthernet0/0): `192.168.1.100`
 - Tunnel Interface: `Tunnel2`
 - Inside Tunnel IPs:
   - AWS: `169.254.81.233/30`
