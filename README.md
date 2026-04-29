@@ -138,7 +138,7 @@ ip nat inside source list NONAT interface GigabitEthernet0/0 overload
 
 ---
 
-### VPN Configuration (High-Level)
+### VPN Configuration
 
 The VPN is built using AWS Site-to-Site VPN and consists of two redundant IPsec tunnels between the on-prem Cisco IOSv router (Customer Gateway) and the AWS Virtual Private Gateway (VGW).
 
@@ -151,10 +151,8 @@ The VPN is built using AWS Site-to-Site VPN and consists of two redundant IPsec 
 - On-Prem WAN Interface (inside NAT): `192.168.1.100`
 - Tunnel Interface: `Tunnel1`
 - Inside Tunnel IPs:
-  - On-Prem: `169.254.222.170/30`
   - AWS: `169.254.222.169/30`
-- Remote Network: `10.0.0.0/16`
-- Local Network: `192.168.0.0/24`
+  - On-Prem: `169.254.222.170/30`
 
 ---
 
@@ -165,8 +163,8 @@ The VPN is built using AWS Site-to-Site VPN and consists of two redundant IPsec 
 - On-Prem WAN Interface (inside NAT): `192.168.1.100`
 - Tunnel Interface: `Tunnel2`
 - Inside Tunnel IPs:
-  - On-Prem: `169.254.81.234/30`
   - AWS: `169.254.81.233/30`
+  - On-Prem: `169.254.81.234/30`
 
 ---
 
@@ -190,19 +188,38 @@ This allows IPsec to function over UDP 4500 without requiring manual port forwar
 
 ---
 
-## AWS Validation
+# AWS Validation
 
-### VPC and Subnet
+## VPC and Subnet
+
+The base network boundary and address space for the AWS environment.
 
 ![VPC Overview](screenshots/1-1-vpc-overview.png)
 ![Subnet Details](screenshots/1-2-subnet-details.png)
 
-### Routing Configuration
+- VPC defined with `10.0.0.0/16` CIDR block
+- DNS resolution and hostnames enabled for internal resolution
+- Public subnet `10.0.1.0/24` deployed in `us-east-1a`
+- Subnet is associated with the active route table for VPN connectivity
+
+---
+
+## Routing Configuration
+
+Traffic control logic between AWS and the on-prem network.
 
 ![Route Table Routes](screenshots/2-1-route-table-routes.png)
 ![Route Table Associations](screenshots/2-2-route-table-associations.png)
 
-### VPN Configuration
+- Route to `192.168.0.0/24` directed through Virtual Private Gateway
+- Local VPC route (`10.0.0.0/16`) preserved for internal traffic
+- Route table explicitly attached to the application subnet
+
+---
+
+## VPN Configuration
+
+Site-to-Site IPsec VPN establishing encrypted connectivity between AWS and on-prem.
 
 ![VPN Overview](screenshots/3-1-vpn-connection-overview.png)
 ![Tunnel 1 Status](screenshots/3-2-tunnel-1-status.png)
@@ -210,49 +227,112 @@ This allows IPsec to function over UDP 4500 without requiring manual port forwar
 ![Customer Gateway](screenshots/3-4-customer-gateway.png)
 ![Virtual Private Gateway](screenshots/3-5-virtual-private-gateway.png)
 
-## EC2 Validation
+- VPN connection in **Available** state
+- Two IPsec tunnels established for redundancy
+- Customer Gateway mapped to public NAT endpoint (`96.230.78.21`)
+- Virtual Private Gateway attached to VPC as AWS termination point
+- Each tunnel uses independent /30 transit networks
+
+---
+
+## Compute Layer
+
+Application workload used for connectivity testing.
 
 ![EC2 Instance Details](screenshots/4-1-ec2-instance-details.png)
 ![Security Group Rules](screenshots/4-2-security-group-rules.png)
 
-## On-Prem Topology
+- EC2 instance deployed in private subnet `10.0.1.0/24`
+- Static private IP assigned for consistent testing (`10.0.1.61`)
+- Security group allows ICMP and SSH for controlled validation
+
+---
+
+## On-Prem Environment
+
+Simulated edge network using GNS3 and Cisco IOSv.
 
 ![GNS3 Topology](screenshots/5-1-gns3-topology.png)
 
-## VPN and Connectivity Validation
+- Internal network: `192.168.0.0/24`
+- Edge router acts as Customer Gateway
+- WAN interface sits behind NAT (`192.168.1.100 → 96.230.78.21`)
+- Represents realistic enterprise edge connectivity model
 
-### Tunnel Status and Routing
+---
+
+## VPN Data Plane State
+
+Router-level interface, routing, and tunnel verification.
+
+### Interface and Routing State
 
 ![Interfaces](screenshots/6-1-show-ip-interface-brief.png)
 ![Routes](screenshots/6-2-show-ip-route.png)
 
-### VPN Health
+- LAN and WAN interfaces correctly assigned
+- Tunnel interfaces operational and up
+- AWS-bound traffic routed through VPN tunnels instead of default gateway
+
+---
+
+### IPsec Security Associations
 
 ![ISAKMP SA](screenshots/6-3-show-crypto-isakmp-sa.png)
 ![IPsec Tunnel 1](screenshots/6-4-show-crypto-ipsec-sa-t1.png)
 ![IPsec Tunnel 2](screenshots/6-5-show-crypto-ipsec-sa-t2.png)
 
-## End-to-End Connectivity Testing
+- IKE Phase 1 successfully established (ISAKMP active)
+- IPsec Phase 2 operational on both tunnels
+- Packet encapsulation confirms encrypted traffic flow
+- Dual tunnel state confirms redundancy readiness
+
+---
+
+## End-to-End Connectivity
+
+Validation of bidirectional communication across the hybrid network.
 
 ### On-Prem → AWS
 
 ![Ping On-Prem to EC2](screenshots/7-2-ping-from-onprem-to-ec2.png)
 ![SSH On-Prem to EC2](screenshots/7-3-ssh-from-onprem-to-ec2.png)
 
+- ICMP and SSH successfully reach AWS private instance
+- Traffic traverses NAT → IPsec VPN → VPC route table
+
+---
+
 ### AWS → On-Prem
 
 ![Ping EC2 to On-Prem](screenshots/7-4-ping-from-ec2-to-onprem.png)
 ![SSH EC2 to On-Prem](screenshots/7-5-ssh-from-ec2-to-onprem.png)
 
-## Failover Validation
+- Reverse connectivity confirmed from AWS to on-prem network
+- Validates full bidirectional routing through VPN
+
+---
+
+## Failover Behavior
+
+Resiliency test of dual-tunnel design.
 
 ### Primary Tunnel Failure
 
 ![Tunnel 1 Down](screenshots/8-1-tunnel1-down.png)
 
-### Traffic Shift to Secondary Tunnel
+- Primary tunnel intentionally disrupted
+- Routing control shifts away from Tunnel 1
+
+---
+
+### Secondary Tunnel Activation
 
 ![Failover to Tunnel 2](screenshots/8-2-traffic-shift-to-tunnel2.png)
+
+- Tunnel 2 maintains connectivity during failure event
+- No interruption in end-to-end traffic flow
+- Confirms redundancy mechanism is functional
 
 ## What This Project Demonstrates
 
