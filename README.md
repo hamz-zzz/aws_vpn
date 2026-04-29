@@ -200,7 +200,7 @@ Traffic control logic between AWS and the on-prem network.
 
 - Route to `192.168.0.0/24` directed through Virtual Private Gateway
 - Local VPC route (`10.0.0.0/16`) preserved for internal traffic
-- Route table explicitly attached to the application subnet
+- Route table explicitly attached to the public subnet
 
 ---
 
@@ -229,7 +229,7 @@ Application workload used for connectivity testing.
 ![EC2 Instance Details](screenshots/4-1-ec2-instance-details.png)
 ![Security Group Rules](screenshots/4-2-security-group-rules.png)
 
-- EC2 instance deployed in private subnet `10.0.1.0/24`
+- EC2 instance deployed in public subnet `10.0.1.0/24`
 - Static private IP assigned for consistent testing (`10.0.1.61`)
 - Security group allows ICMP and SSH for controlled validation
 
@@ -242,9 +242,8 @@ Simulated edge network using GNS3 and Cisco IOSv.
 ![GNS3 Topology](screenshots/5-1-gns3-topology.png)
 
 - Internal network: `192.168.0.0/24`
-- Edge router acts as Customer Gateway
+- Cisco IOSv router acts as Customer Gateway
 - WAN interface sits behind NAT (`192.168.1.100 → 96.230.78.21`)
-- Represents realistic enterprise edge connectivity model
 
 ---
 
@@ -254,25 +253,40 @@ Router-level interface, routing, and tunnel verification.
 
 ### Interface and Routing State
 
-![Interfaces](screenshots/6-1-show-ip-interface-brief.png)
-![Routes](screenshots/6-2-show-ip-route.png)
+![Interfaces](screenshots/6-1-show-ip-interface-brief.png) 
+- `GigabitEthernet0/0` (WAN) and `GigabitEthernet0/1` (LAN) are correctly assigned IP addresses  
+- `Tunnel1` and `Tunnel2` are in an up/up state, confirming both VPN tunnels are established at the interface level  
 
-- LAN and WAN interfaces correctly assigned
-- Tunnel interfaces operational and up
-- AWS-bound traffic routed through VPN tunnels instead of default gateway
+---
+
+![Routes](screenshots/6-2-show-ip-route.png)
+- Static routes for `10.0.0.0/16` point to VPN tunnel interfaces  
+- Confirms AWS-bound traffic is routed through the VPN rather than the default internet gateway  
 
 ---
 
 ### IPsec Security Associations
 
 ![ISAKMP SA](screenshots/6-3-show-crypto-isakmp-sa.png)
-![IPsec Tunnel 1](screenshots/6-4-show-crypto-ipsec-sa-t1.png)
-![IPsec Tunnel 2](screenshots/6-5-show-crypto-ipsec-sa-t2.png)
+- IKE Phase 1 established (`QM_IDLE`)
+- Both AWS peer endpoints are present
 
-- IKE Phase 1 successfully established (ISAKMP active)
-- IPsec Phase 2 operational on both tunnels
-- Packet encapsulation confirms encrypted traffic flow
-- Dual tunnel state confirms redundancy readiness
+---
+
+![IPsec Tunnel 1](screenshots/6-4-show-crypto-ipsec-sa-t1.png)
+- Active IPsec tunnel (primary)
+- Packet counters increasing → traffic flowing
+
+---
+
+![IPsec Tunnel 2](screenshots/6-5-show-crypto-ipsec-sa-t2.png)
+- Secondary tunnel established
+- Ready for failover (may have low or no traffic)
+
+---
+
+- IPsec fully operational across both tunnels  
+- Encryption active with verified traffic flow  
 
 ---
 
