@@ -4,9 +4,7 @@
 
 ![Architecture](architecture/aws-vpn-architecture.svg)
 
-This project implements hybrid connectivity between an on-premises network (simulated in GNS3) and an AWS VPC using a Site-to-Site VPN.
-Traffic flows securely from the on-prem network to AWS over encrypted IPsec tunnels, and terminates at a Virtual Private Gateway (VGW).  
-The architecture includes dual tunnels for redundancy and demonstrates reliable bidirectional communication between environments.
+This project implements hybrid connectivity between an on-premises network (simulated in GNS3) and an AWS VPC using a Site-to-Site VPN. Traffic flows securely from the on-prem network to AWS over encrypted IPsec tunnels, and terminates at a Virtual Private Gateway (VGW). The architecture includes dual tunnels for redundancy and demonstrates reliable bidirectional communication between environments.
 
 ---
 
@@ -175,7 +173,7 @@ This allows IPsec to function over UDP 4500 without requiring manual port forwar
 
 ---
 
-# AWS Environment
+## AWS Environment
 
 ## VPC and Subnet
 
@@ -283,7 +281,7 @@ Application workload used for connectivity testing.
 
 ---
 
-# On-Prem Environment
+## On-Prem Environment
 
 Simulated edge network using GNS3 and Cisco IOSv.
 
