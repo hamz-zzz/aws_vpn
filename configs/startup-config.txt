@@ -1,0 +1,219 @@
+
+!
+! Last configuration change at 01:12:05 UTC Wed Apr 29 2026
+!
+version 15.9
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+!
+hostname vpn-router
+!
+boot-start-marker
+boot-end-marker
+!
+!
+!
+no aaa new-model
+!
+!
+!
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
+!
+!
+!
+!
+!
+no ip icmp rate-limit unreachable
+!
+!
+!
+!
+!
+!
+no ip domain lookup
+ip domain name lab.local
+ip cef
+no ipv6 cef
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+username admin secret 9 $9$ltuFD0LAFjzl8f$Da8G9/rx7ioePdiqp3zksUKjSueeTOwnmu.3wE9An46
+!
+redundancy
+!
+no cdp log mismatch duplex
+!
+track 100 ip sla 100 reachability
+!
+track 200 ip sla 200 reachability
+!
+ip tcp synwait-time 5
+! 
+!
+!
+!
+!
+crypto isakmp policy 10
+ encr aes
+ authentication pre-share
+ group 2
+ lifetime 28800
+!
+crypto isakmp policy 20
+ encr aes
+ authentication pre-share
+ group 2
+ lifetime 28800
+crypto isakmp key amIF9LgFNOHdPvj3_ZW54w7plYXHxlOW address 34.193.85.87   
+crypto isakmp key RllAxevnuyPfPaTntPZyBt2IZJXoazKa address 100.50.211.87  
+crypto isakmp nat keepalive 10
+!
+!
+crypto ipsec transform-set AWS-SET esp-aes esp-sha-hmac 
+ mode tunnel
+crypto ipsec transform-set AWS-SET-2 esp-aes esp-sha-hmac 
+ mode tunnel
+!
+crypto ipsec profile AWS-PROFILE
+ set transform-set AWS-SET 
+ set pfs group2
+!
+crypto ipsec profile AWS-PROFILE-2
+ set transform-set AWS-SET-2 
+ set pfs group2
+!
+!
+!
+!
+!
+!
+!
+interface Tunnel1
+ description AWS VPN Tunnel 1
+ ip address 169.254.222.170 255.255.255.252
+ ip tcp adjust-mss 1379
+ tunnel source GigabitEthernet0/0
+ tunnel mode ipsec ipv4
+ tunnel destination 34.193.85.87
+ tunnel protection ipsec profile AWS-PROFILE
+!
+interface Tunnel2
+ description AWS VPN Tunnel 2
+ ip address 169.254.81.234 255.255.255.252
+ ip tcp adjust-mss 1379
+ tunnel source GigabitEthernet0/0
+ tunnel mode ipsec ipv4
+ tunnel destination 100.50.211.87
+ tunnel protection ipsec profile AWS-PROFILE-2
+!
+interface GigabitEthernet0/0
+ description WAN to Verizon Router
+ ip address 192.168.1.100 255.255.255.0
+ ip nat outside
+ ip virtual-reassembly in
+ duplex auto
+ speed auto
+ media-type rj45
+!
+interface GigabitEthernet0/1
+ description LAN (On-Prem Network)
+ ip address 192.168.0.1 255.255.255.0
+ ip nat inside
+ ip virtual-reassembly in
+ duplex auto
+ speed auto
+ media-type rj45
+!
+interface GigabitEthernet0/2
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+ media-type rj45
+!
+interface GigabitEthernet0/3
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+ media-type rj45
+!
+ip forward-protocol nd
+!
+!
+no ip http server
+no ip http secure-server
+ip nat inside source list NONAT interface GigabitEthernet0/0 overload
+ip route 10.0.0.0 255.255.0.0 Tunnel1 track 100
+ip route 10.0.0.0 255.255.0.0 Tunnel2 track 200
+ip route 0.0.0.0 0.0.0.0 GigabitEthernet0/0 192.168.1.1
+ip ssh version 2
+!
+ip access-list extended NONAT
+ deny   ip 192.168.0.0 0.0.0.255 10.0.0.0 0.0.255.255
+ permit ip 192.168.0.0 0.0.0.255 any
+!
+ip sla 100
+ icmp-echo 169.254.222.169 source-interface Tunnel1
+ frequency 5
+ip sla schedule 100 life forever start-time now
+ip sla 200
+ icmp-echo 169.254.81.233 source-interface Tunnel2
+ frequency 5
+ip sla schedule 200 life forever start-time now
+ipv6 ioam timestamp
+!
+!
+!
+control-plane
+!
+banner exec 
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************
+banner incoming 
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************
+banner login 
+**************************************************************************
+* IOSv is strictly limited to use for evaluation, demonstration and IOS  *
+* education. IOSv is provided as-is and is not supported by Cisco's      *
+* Technical Advisory Center. Any use or disclosure, in whole or in part, *
+* of the IOSv Software or Documentation to any third party for any       *
+* purposes is expressly prohibited except as otherwise authorized by     *
+* Cisco in writing.                                                      *
+**************************************************************************
+!
+line con 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+line aux 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+line vty 0 4
+ login local
+ transport input ssh
+!
+no scheduler allocate
+!
+end

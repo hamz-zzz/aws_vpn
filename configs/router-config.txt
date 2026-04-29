@@ -1,21 +1,14 @@
-! ---------------------------
-! TUNNEL 1
-! ---------------------------
-
 conf t
-hostname AWS-VPN-RTR
+hostname vpn-router
 
 !
-! ---------------------------
 ! INTERFACES
-! ---------------------------
 !
 interface GigabitEthernet0/0
  description WAN to Verizon Router
- ip address 192.168.1.100
+ ip address 192.168.1.100 255.255.255.0
  ip nat outside
  no shutdown
-
 interface GigabitEthernet0/1
  description LAN (On-Prem Network)
  ip address 192.168.0.1 255.255.255.0
@@ -23,27 +16,20 @@ interface GigabitEthernet0/1
  no shutdown
 
 !
-! ---------------------------
 ! ROUTING
-! ---------------------------
 !
 ip route 0.0.0.0 0.0.0.0 GigabitEthernet0/0 192.168.1.1
 
 !
-! ---------------------------
-! NAT (WITH VPN EXEMPTION)
-! ---------------------------
+! NAT (VPN EXEMPTION)
 !
 ip access-list extended NONAT
  deny ip 192.168.0.0 0.0.0.255 10.0.0.0 0.0.255.255
  permit ip 192.168.0.0 0.0.0.255 any
-
 ip nat inside source list NONAT interface GigabitEthernet0/0 overload
 
 !
-! ---------------------------
-! IKE (PHASE 1)
-! ---------------------------
+! IKE PHASE 1
 !
 crypto isakmp policy 10
  encr aes 128
@@ -51,34 +37,21 @@ crypto isakmp policy 10
  authentication pre-share
  group 2
  lifetime 28800
-
-!
-! Pre-shared key (Tunnel 1)
-!
 crypto isakmp key amIF9LgFNOHdPvj3_ZW54w7plYXHxlOW address 34.193.85.87
-
-!
-! NAT keepalive (helps behind NAT)
-!
 crypto isakmp nat keepalive 10
 
 !
-! ---------------------------
-! IPSEC (PHASE 2)
-! ---------------------------
+! IPSEC PHASE 2
 !
 crypto ipsec transform-set AWS-SET esp-aes 128 esp-sha-hmac
  mode tunnel
-
 crypto ipsec profile AWS-PROFILE
  set transform-set AWS-SET
  set pfs group2
  set security-association lifetime seconds 3600
 
 !
-! ---------------------------
-! TUNNEL INTERFACE (AWS)
-! ---------------------------
+! TUNNEL 1
 !
 interface Tunnel1
  description AWS VPN Tunnel 1
@@ -89,18 +62,8 @@ interface Tunnel1
  tunnel protection ipsec profile AWS-PROFILE
  ip tcp adjust-mss 1379
  no shutdown
-
-!
-! ---------------------------
-! ROUTE TO AWS
-! ---------------------------
-!
 ip route 10.0.0.0 255.255.0.0 Tunnel1 track 100
 
-! -----------------------
-! TUNNEL 1 SLA + TRACK
-! -----------------------
-!
 ip sla 100
  icmp-echo 169.254.222.169 source-interface Tunnel1
  timeout 5000
@@ -108,39 +71,27 @@ ip sla 100
 ip sla schedule 100 life forever start-time now
 track 100 ip sla 100 reachability
 
-
 !
-! ---------------------------
-! OPTIONAL SSH ACCESS (recommended)
-! ---------------------------
+! SSH ACCESS
 !
-hostname vpn-router
 ip domain-name lab.local
-
 crypto key generate rsa modulus 2048
 ip ssh version 2
-
 username admin secret cisco123
-
 line vty 0 4
  login local
  transport input ssh
 
-!
 end
 write memory
 
-
-! ---------------------------
+!
 ! TUNNEL 2
-! ---------------------------
-
+!
 conf t
 
 !
-! -----------------------
-! IKE PHASE 1 (Tunnel 2)
-! -----------------------
+! IKE PHASE 1
 !
 crypto isakmp policy 20
  encr aes 128
@@ -148,29 +99,20 @@ crypto isakmp policy 20
  authentication pre-share
  group 2
  lifetime 28800
-
-!
-! Pre-shared key (Tunnel 2 peer)
-!
 crypto isakmp key RllAxevnuyPfPaTntPZyBt2IZJXoazKa address 100.50.211.87
 
 !
-! -----------------------
 ! IPSEC PHASE 2
-! -----------------------
 !
 crypto ipsec transform-set AWS-SET-2 esp-aes 128 esp-sha-hmac
  mode tunnel
-
 crypto ipsec profile AWS-PROFILE-2
  set transform-set AWS-SET-2
  set pfs group2
  set security-association lifetime seconds 3600
 
 !
-! -----------------------
-! TUNNEL INTERFACE 2
-! -----------------------
+! TUNNEL 2
 !
 interface Tunnel2
  description AWS VPN Tunnel 2
@@ -181,17 +123,8 @@ interface Tunnel2
  tunnel protection ipsec profile AWS-PROFILE-2
  ip tcp adjust-mss 1379
  no shutdown
-
-!
-! -----------------------
-! ROUTE VIA TUNNEL 2 (backup OR optional active-active)
-! -----------------------
-!
 ip route 10.0.0.0 255.255.0.0 Tunnel2 track 200
-!
-! -----------------------
-! TUNNEL 2 SLA + TRACK
-! -----------------------
+
 ip sla 200
  icmp-echo 169.254.81.233 source-interface Tunnel2
  timeout 5000
