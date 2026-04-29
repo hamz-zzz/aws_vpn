@@ -140,25 +140,41 @@ ip nat inside source list NONAT interface GigabitEthernet0/0 overload
 
 ### VPN Configuration (High-Level)
 
-The VPN is built using AWS-provided configuration and includes:
+The VPN is built using AWS Site-to-Site VPN and consists of two redundant IPsec tunnels between the on-prem Cisco IOSv router (Customer Gateway) and the AWS Virtual Private Gateway (VGW).
 
-- **IKE Phase 1 (ISAKMP)**
-  - Encryption: AES-128
-  - Hash: SHA
-  - Authentication: Pre-shared key
+---
 
-- **IPsec Phase 2**
-  - Transform set: AES + SHA
-  - Tunnel mode
+### Tunnel 1 (Primary)
 
-- **Tunnel Interfaces**
-  - Tunnel 1 (Primary)
-  - Tunnel 2 (Secondary)
+- AWS Public Peer IP: `34.193.85.87`
+- On-Prem Public Endpoint (NATed): `96.230.78.21`
+- On-Prem WAN Interface (inside NAT): `192.168.1.100`
+- Tunnel Interface: `Tunnel1`
+- Inside Tunnel IPs:
+  - On-Prem: `169.254.222.170/30`
+  - AWS: `169.254.222.169/30`
+- Remote Network: `10.0.0.0/16`
+- Local Network: `192.168.0.0/24`
 
-Each tunnel includes:
-- AWS public peer IP (outside address)
-- Link-local IP range (`169.254.x.x/30`)
-- IPsec profile binding
+---
+
+### Tunnel 2 (Secondary)
+
+- AWS Public Peer IP: `100.50.211.87`
+- On-Prem Public Endpoint (NATed): `96.230.78.21`
+- On-Prem WAN Interface (inside NAT): `192.168.1.100`
+- Tunnel Interface: `Tunnel2`
+- Inside Tunnel IPs:
+  - On-Prem: `169.254.81.234/30`
+  - AWS: `169.254.81.233/30`
+
+---
+
+## Operational Behavior
+
+- Tunnel 1 is the primary path under normal operation.
+- Tunnel 2 provides redundancy.
+- If Tunnel 1 fails, traffic shifts automatically to Tunnel 2 based on routing preference and tracking.
 
 ---
 
