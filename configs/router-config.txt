@@ -1,3 +1,7 @@
+! ---------------------------
+! TUNNEL 1
+! ---------------------------
+
 conf t
 hostname AWS-VPN-RTR
 
@@ -8,7 +12,7 @@ hostname AWS-VPN-RTR
 !
 interface GigabitEthernet0/0
  description WAN to Verizon Router
- ip address dhcp
+ ip address 192.168.1.100
  ip nat outside
  no shutdown
 
@@ -23,7 +27,7 @@ interface GigabitEthernet0/1
 ! ROUTING
 ! ---------------------------
 !
-ip route 0.0.0.0 0.0.0.0 dhcp
+ip route 0.0.0.0 0.0.0.0 GigabitEthernet0/0 192.168.1.1
 
 !
 ! ---------------------------
@@ -91,7 +95,19 @@ interface Tunnel1
 ! ROUTE TO AWS
 ! ---------------------------
 !
-ip route 10.0.0.0 255.255.0.0 Tunnel1
+ip route 10.0.0.0 255.255.0.0 Tunnel1 track 100
+
+! -----------------------
+! TUNNEL 1 SLA + TRACK
+! -----------------------
+!
+ip sla 100
+ icmp-echo 169.254.222.169 source-interface Tunnel1
+ timeout 5000
+ frequency 5
+ip sla schedule 100 life forever start-time now
+track 100 ip sla 100 reachability
+
 
 !
 ! ---------------------------
@@ -111,5 +127,77 @@ line vty 0 4
  transport input ssh
 
 !
+end
+write memory
+
+
+! ---------------------------
+! TUNNEL 2
+! ---------------------------
+
+conf t
+
+!
+! -----------------------
+! IKE PHASE 1 (Tunnel 2)
+! -----------------------
+!
+crypto isakmp policy 20
+ encr aes 128
+ hash sha
+ authentication pre-share
+ group 2
+ lifetime 28800
+
+!
+! Pre-shared key (Tunnel 2 peer)
+!
+crypto isakmp key RllAxevnuyPfPaTntPZyBt2IZJXoazKa address 100.50.211.87
+
+!
+! -----------------------
+! IPSEC PHASE 2
+! -----------------------
+!
+crypto ipsec transform-set AWS-SET-2 esp-aes 128 esp-sha-hmac
+ mode tunnel
+
+crypto ipsec profile AWS-PROFILE-2
+ set transform-set AWS-SET-2
+ set pfs group2
+ set security-association lifetime seconds 3600
+
+!
+! -----------------------
+! TUNNEL INTERFACE 2
+! -----------------------
+!
+interface Tunnel2
+ description AWS VPN Tunnel 2
+ ip address 169.254.81.234 255.255.255.252
+ tunnel source GigabitEthernet0/0
+ tunnel destination 100.50.211.87
+ tunnel mode ipsec ipv4
+ tunnel protection ipsec profile AWS-PROFILE-2
+ ip tcp adjust-mss 1379
+ no shutdown
+
+!
+! -----------------------
+! ROUTE VIA TUNNEL 2 (backup OR optional active-active)
+! -----------------------
+!
+ip route 10.0.0.0 255.255.0.0 Tunnel2 track 200
+!
+! -----------------------
+! TUNNEL 2 SLA + TRACK
+! -----------------------
+ip sla 200
+ icmp-echo 169.254.81.233 source-interface Tunnel2
+ timeout 5000
+ frequency 5
+ip sla schedule 200 life forever start-time now
+track 200 ip sla 200 reachability
+
 end
 write memory
