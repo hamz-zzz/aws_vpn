@@ -280,24 +280,37 @@ Router-level interface, routing, and tunnel verification.
 
 Validation of bidirectional communication across the hybrid network.
 
+---
+
 ### On-Prem → AWS
 
 ![Ping On-Prem to EC2](screenshots/7-2-ping-from-onprem-to-ec2.png)
+
+ICMP echo request from `192.168.0.10` (on-prem host) → `10.0.1.61` (AWS EC2 instance)  
+Validates basic Layer 3 connectivity across the IPsec VPN tunnel.
+
+---
+
 ![SSH On-Prem to EC2](screenshots/7-3-ssh-from-onprem-to-ec2.png)
 
-- ICMP and SSH successfully reach AWS private instance
-- Traffic traverses NAT → IPsec VPN → VPC route table
+SSH session from `192.168.0.10` (on-prem host) → `10.0.1.61` (AWS EC2 instance)  
+Validates secure administrative access over the encrypted VPN path.
 
 ---
 
 ### AWS → On-Prem
 
 ![Ping EC2 to On-Prem](screenshots/7-4-ping-from-ec2-to-onprem.png)
+
+ICMP echo request from `10.0.1.61` (AWS EC2 instance) → `192.168.0.10` (on-prem host)  
+Validates reverse routing from AWS back into the on-prem network.
+
+---
+
 ![SSH EC2 to On-Prem](screenshots/7-5-ssh-from-ec2-to-onprem.png)
 
-- Reverse connectivity confirmed from AWS to on-prem network
-- Validates full bidirectional routing through VPN
-
+SSH session from `10.0.1.61` (AWS EC2 instance) → `192.168.0.10` (on-prem host)  
+Validates full bidirectional reachability and functional return path through the VPN.
 ---
 
 ## Failover Behavior
