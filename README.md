@@ -175,13 +175,18 @@ This allows IPsec to function over UDP 4500 without requiring manual port forwar
 
 ---
 
-# AWS Validation
+# AWS Environment
 
 ## VPC and Subnet
 
 The base network boundary and address space for the AWS environment.
 
+### VPC
+
 ![VPC Overview](screenshots/1-1-vpc-overview.png)
+
+### Subnet Details
+
 ![Subnet Details](screenshots/1-2-subnet-details.png)
 
 - VPC defined with `10.0.0.0/16` CIDR block
@@ -278,7 +283,7 @@ Application workload used for connectivity testing.
 
 ---
 
-## On-Prem Environment
+# On-Prem Environment
 
 Simulated edge network using GNS3 and Cisco IOSv.
 
