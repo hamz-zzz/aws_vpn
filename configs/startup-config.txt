@@ -152,7 +152,7 @@ no ip http server
 no ip http secure-server
 ip nat inside source list NONAT interface GigabitEthernet0/0 overload
 ip route 10.0.0.0 255.255.0.0 Tunnel1 track 100
-ip route 10.0.0.0 255.255.0.0 Tunnel2 track 200
+ip route 10.0.0.0 255.255.0.0 Tunnel2 2 track 200
 ip route 0.0.0.0 0.0.0.0 GigabitEthernet0/0 192.168.1.1
 ip ssh version 2
 !
