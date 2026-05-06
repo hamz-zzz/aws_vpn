@@ -123,7 +123,7 @@ interface Tunnel2
  tunnel protection ipsec profile AWS-PROFILE-2
  ip tcp adjust-mss 1379
  no shutdown
-ip route 10.0.0.0 255.255.0.0 Tunnel2 track 200
+ip route 10.0.0.0 255.255.0.0 Tunnel2 2 track 200
 
 ip sla 200
  icmp-echo 169.254.81.233 source-interface Tunnel2
