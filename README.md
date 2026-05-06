@@ -410,13 +410,22 @@
 
   ---
 
-  ### Secondary Tunnel Activation
+### Secondary Tunnel Activation (Failover Test)
 
-  ![Failover to Tunnel 2](screenshots/8-2-traffic-shift-to-tunnel2.png)
+After administratively shutting down Tunnel1, the routing table automatically re-converged to Tunnel2 as the primary active path.
 
-  - Tunnel 2 maintains connectivity during failure event
-  - No interruption in end-to-end traffic flow
-  - Confirms redundancy mechanism is functional
+![Failover to Tunnel 2](screenshots/8-2-traffic-shift-to-tunnel2.png)
+
+- Tunnel2 becomes the active route for the `10.0.0.0/16` AWS VPC network
+- Traffic is seamlessly redirected without application-layer interruption
+- Static route with higher administrative distance (AD 2) is promoted after primary path failure
+- Confirms VPN redundancy and failover mechanism is functioning as designed
+
+### Routing Validation (Post-Failover)
+
+- `10.0.0.0/16` is now routed via Tunnel2
+- Tunnel1 route is removed or inactive due to interface shutdown
+- Default internet route remains unchanged via `192.168.1.1`
 
   ## What This Project Demonstrates
 
